@@ -1,31 +1,29 @@
 module Types exposing (..)
 
+import ColorIndex exposing (ColorIndex)
 import Lamdera exposing (ClientId)
 import Set exposing (Set)
 
 
 type alias BackendModel =
-    { counter : Int
-    , clients : Set ClientId
+    { clients : Set ClientId
+    , currentColor : ColorIndex
     }
 
 
 type alias FrontendModel =
-    { counter : Int
-    , clientId : String
+    { currentColor : Maybe ColorIndex
     }
 
 
 type FrontendMsg
-    = Increment
-    | Decrement
+    = UserPressColor ColorIndex
     | FNoop
 
 
 type ToBackend
-    = ClientJoin
-    | CounterIncremented
-    | CounterDecremented
+    = ChooseColor ColorIndex
+    | ClientConnect
 
 
 type BackendMsg
@@ -33,4 +31,4 @@ type BackendMsg
 
 
 type ToFrontend
-    = CounterNewValue Int String
+    = UpdateColor ColorIndex

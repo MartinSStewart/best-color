@@ -1,6 +1,7 @@
 module Backend exposing (app, init)
 
-import Lamdera exposing (ClientId, SessionId, sendToFrontend)
+import ColorIndex
+import Lamdera exposing (ClientId, SessionId)
 import Set exposing (Set)
 import Types exposing (..)
 
@@ -20,7 +21,7 @@ app =
 
 init : ( Model, Cmd BackendMsg )
 init =
-    ( { counter = 0, clients = Set.empty }, Cmd.none )
+    ( { currentColor = ColorIndex.Blue, clients = Set.empty }, Cmd.none )
 
 
 update : BackendMsg -> Model -> ( Model, Cmd BackendMsg )
@@ -31,30 +32,22 @@ update msg model =
 
 
 updateFromFrontend : SessionId -> ClientId -> ToBackend -> Model -> ( Model, Cmd BackendMsg )
-updateFromFrontend sessionId clientId msg model =
+updateFromFrontend _ clientId msg model =
     case msg of
-        ClientJoin ->
+        ClientConnect ->
             ( { model | clients = Set.insert clientId model.clients }
-            , sendToFrontend clientId (CounterNewValue model.counter clientId)
+            , Lamdera.sendToFrontend clientId (UpdateColor model.currentColor)
             )
 
-        CounterIncremented ->
-            let
-                newCounterValue =
-                    model.counter + 1
-            in
-            ( { model | counter = newCounterValue }, broadcast model.clients (CounterNewValue newCounterValue clientId) )
-
-        CounterDecremented ->
-            let
-                newCounterValue =
-                    model.counter - 1
-            in
-            ( { model | counter = newCounterValue }, broadcast model.clients (CounterNewValue newCounterValue clientId) )
+        ChooseColor colorIndex ->
+            ( { model | currentColor = colorIndex }
+            , broadcast (Set.remove clientId model.clients) (UpdateColor colorIndex)
+            )
 
 
+broadcast : Set ClientId -> ToFrontend -> Cmd BackendMsg
 broadcast clients msg =
     clients
         |> Set.toList
-        |> List.map (\clientId -> sendToFrontend clientId msg)
+        |> List.map (\clientId -> Lamdera.sendToFrontend clientId msg)
         |> Cmd.batch
