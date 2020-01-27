@@ -35,7 +35,7 @@ app =
 
 init : ( Model, Cmd FrontendMsg )
 init =
-    ( { currentColor = Nothing }, Lamdera.sendToBackend ClientConnect )
+    ( { currentColor = Nothing, changeCount = Nothing }, Lamdera.sendToBackend ClientConnect )
 
 
 update : FrontendMsg -> Model -> ( Model, Cmd FrontendMsg )
@@ -51,23 +51,23 @@ update msg model =
 updateFromBackend : ToFrontend -> Model -> ( Model, Cmd FrontendMsg )
 updateFromBackend msg model =
     case msg of
-        UpdateColor colorIndex ->
-            ( { model | currentColor = Just colorIndex }, Cmd.none )
+        UpdateColor colorIndex changeCount ->
+            ( { model | currentColor = Just colorIndex, changeCount = Just changeCount }, Cmd.none )
 
 
 view : Model -> { title : String, body : List (Html FrontendMsg) }
 view model =
-    case model.currentColor of
-        Just color ->
+    case ( model.currentColor, model.changeCount ) of
+        ( Just color, Just changeCount ) ->
             { title = "The best color is " ++ ColorIndex.toString color ++ "!"
             , body =
                 [ Element.layout
                     []
-                    (view_ model color)
+                    (view_ changeCount color)
                 ]
             }
 
-        Nothing ->
+        _ ->
             { title = ""
             , body =
                 [ Element.layout
@@ -77,12 +77,15 @@ view model =
             }
 
 
-view_ : Model -> ColorIndex.ColorIndex -> Element.Element FrontendMsg
-view_ model color =
+view_ : Int -> ColorIndex.ColorIndex -> Element.Element FrontendMsg
+view_ changeCount color =
     Element.column
         [ Element.width Element.fill
         , Element.height Element.fill
         , Background.color (ColorIndex.toElColor color)
+        , Element.text ("The best color has changed " ++ String.fromInt changeCount ++ " times.")
+            |> Element.el [ Element.alignBottom, Element.alignRight, Element.padding 4 ]
+            |> Element.inFront
         ]
         [ Element.el [ Element.width Element.fill, Element.height <| Element.fillPortion 5 ] <|
             Element.column
@@ -106,7 +109,7 @@ colorChoices =
     ColorIndex.allColors
         |> List.map colorButton
         |> Element.wrappedRow
-            [ Element.centerX ]
+            [ Element.centerX, Element.above <| Element.el [ Font.size 30, Element.centerX ] <| Element.text "No! The best color is..." ]
 
 
 colorButton colorInput =

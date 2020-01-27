@@ -21,7 +21,7 @@ app =
 
 init : ( Model, Cmd BackendMsg )
 init =
-    ( { currentColor = ColorIndex.Blue, clients = Set.empty }, Cmd.none )
+    ( { currentColor = ColorIndex.Blue, changeCount = 0, lastChangedBy = Nothing, clients = Set.empty }, Cmd.none )
 
 
 update : BackendMsg -> Model -> ( Model, Cmd BackendMsg )
@@ -32,16 +32,24 @@ update msg model =
 
 
 updateFromFrontend : SessionId -> ClientId -> ToBackend -> Model -> ( Model, Cmd BackendMsg )
-updateFromFrontend _ clientId msg model =
+updateFromFrontend sessionId clientId msg model =
     case msg of
         ClientConnect ->
             ( { model | clients = Set.insert clientId model.clients }
-            , Lamdera.sendToFrontend clientId (UpdateColor model.currentColor)
+            , Lamdera.sendToFrontend clientId (UpdateColor model.currentColor model.changeCount)
             )
 
         ChooseColor colorIndex ->
-            ( { model | currentColor = colorIndex }
-            , broadcast (Set.remove clientId model.clients) (UpdateColor colorIndex)
+            let
+                changeCount =
+                    if model.lastChangedBy == Just sessionId then
+                        model.changeCount
+
+                    else
+                        model.changeCount + 1
+            in
+            ( { model | currentColor = colorIndex, lastChangedBy = Just sessionId, changeCount = changeCount }
+            , broadcast model.clients (UpdateColor colorIndex changeCount)
             )
 
 
