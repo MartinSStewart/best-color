@@ -1,5 +1,6 @@
 module Types exposing (..)
 
+import Animator exposing (Animator)
 import ColorIndex exposing (ColorIndex)
 import Lamdera exposing (ClientId, SessionId)
 import Set exposing (Set)
@@ -13,9 +14,15 @@ type alias BackendModel =
     }
 
 
-type alias FrontendModel =
-    { currentColor : Maybe ColorIndex
-    , changeCount : Maybe Int
+type FrontendModel
+    = Loading
+    | Loaded LoadedModel
+
+
+type alias LoadedModel =
+    { --Remove current color and lamdera live should work again
+      currentColor : Animator.Timeline ColorIndex
+    , changeCount : Int
     }
 
 
