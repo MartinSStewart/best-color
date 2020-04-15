@@ -1,5 +1,8 @@
 module Frontend exposing (Model, app)
 
+import Animator
+import Animator.Inline
+import Color exposing (Color)
 import Color.Manipulate
 import ColorIndex
 import Element
@@ -33,9 +36,23 @@ app =
         }
 
 
+animator : Animator.Animator LoadedModel
+animator =
+    Animator.animator
+        |> Animator.watching
+            -- we tell the animator how
+            -- to get the checked timeline using .checked
+            .currentColor
+            -- and we tell the animator how
+            -- to update that timeline as well
+            (\currentColor model_ ->
+                { model_ | currentColor = currentColor }
+            )
+
+
 init : ( Model, Cmd FrontendMsg )
 init =
-    ( { currentColor = Nothing, changeCount = Nothing }, Lamdera.sendToBackend ClientConnect )
+    ( Loading, Lamdera.sendToBackend ClientConnect )
 
 
 update : FrontendMsg -> Model -> ( Model, Cmd FrontendMsg )
@@ -45,29 +62,59 @@ update msg model =
             ( model, Cmd.none )
 
         UserPressColor colorIndex ->
-            ( { model | currentColor = Just colorIndex }, Lamdera.sendToBackend (ChooseColor colorIndex) )
+            case model of
+                Loaded model_ ->
+                    ( Loaded
+                        { model_
+                            | currentColor =
+                                model_.currentColor
+                                    |> Animator.go Animator.slowly colorIndex
+                        }
+                    , Lamdera.sendToBackend (ChooseColor colorIndex)
+                    )
+
+                Loading ->
+                    ( model, Cmd.none )
 
 
 updateFromBackend : ToFrontend -> Model -> ( Model, Cmd FrontendMsg )
 updateFromBackend msg model =
     case msg of
         UpdateColor colorIndex changeCount ->
-            ( { model | currentColor = Just colorIndex, changeCount = Just changeCount }, Cmd.none )
+            case model of
+                Loaded model_ ->
+                    ( Loaded
+                        { model_
+                            | currentColor =
+                                model_.currentColor
+                                    |> Animator.go Animator.slowly colorIndex
+                            , changeCount = changeCount
+                        }
+                    , Cmd.none
+                    )
+
+                Loading ->
+                    ( Loaded { currentColor = Animator.init colorIndex, changeCount = changeCount }
+                    , Cmd.none
+                    )
 
 
 view : Model -> { title : String, body : List (Html FrontendMsg) }
 view model =
-    case ( model.currentColor, model.changeCount ) of
-        ( Just color, Just changeCount ) ->
-            { title = "The best color is " ++ ColorIndex.toString color ++ "!"
+    case model of
+        Loaded { currentColor, changeCount } ->
+            { title =
+                "The best color is "
+                    ++ ColorIndex.toString (Animator.current currentColor)
+                    ++ "!"
             , body =
                 [ Element.layout
                     []
-                    (view_ changeCount color)
+                    (view_ changeCount currentColor)
                 ]
             }
 
-        _ ->
+        Loading ->
             { title = ""
             , body =
                 [ Element.layout
@@ -77,12 +124,17 @@ view model =
             }
 
 
-view_ : Int -> ColorIndex.ColorIndex -> Element.Element FrontendMsg
+view_ : Int -> Animator.Timeline ColorIndex.ColorIndex -> Element.Element FrontendMsg
 view_ changeCount color =
+    let
+        animatedColor : Color
+        animatedColor =
+            Animator.Inline.backgroundColor color ColorIndex.toColor
+    in
     Element.column
         [ Element.width Element.fill
         , Element.height Element.fill
-        , Background.color (ColorIndex.toElColor color)
+        , Background.color (ColorIndex.colorToElColor animatedColor)
         , Element.text ("The best color has changed " ++ String.fromInt changeCount ++ " times.")
             |> Element.el [ Element.alignBottom, Element.alignRight, Element.padding 4 ]
             |> Element.inFront
@@ -92,12 +144,12 @@ view_ changeCount color =
                 [ Font.size 40, Element.centerX, Element.centerY ]
                 [ Element.text <| "The best color is"
                 , Element.el
-                    [ ColorIndex.toColor color |> Color.Manipulate.lighten 0.1 |> ColorIndex.colorToElColor |> Font.color
+                    [ animatedColor |> Color.Manipulate.lighten 0.1 |> ColorIndex.colorToElColor |> Font.color
                     , Font.shadow { offset = ( 0, 2 ), blur = 3, color = Element.rgba 0 0 0 0.5 }
                     , Font.size 80
                     , Element.centerX
                     ]
-                    (Element.text (ColorIndex.toString color ++ "!"))
+                    (Element.text (ColorIndex.toString (Animator.current color) ++ "!"))
                 ]
         , Element.el
             [ Element.width Element.fill, Element.height <| Element.fillPortion 2 ]
