@@ -31,7 +31,7 @@ toColor colorIndex =
             Color.orange
 
         Brown ->
-            Color.brown
+            Color.rgb255 110 71 44
 
         Purple ->
             Color.purple
