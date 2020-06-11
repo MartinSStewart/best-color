@@ -1,4 +1,4 @@
-module Evergreen.Type.V2 exposing (..)
+module Evergreen.V2.Types exposing (..)
 
 import ColorIndex exposing (ColorIndex)
 import Lamdera exposing (ClientId, SessionId)

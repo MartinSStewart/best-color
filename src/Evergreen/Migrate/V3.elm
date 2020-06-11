@@ -1,31 +1,18 @@
-module Evergreen.Migrate.V2 exposing (..)
+module Evergreen.Migrate.V3 exposing (..)
 
-import Evergreen.V1.Types as Old
-import Evergreen.V2.Types as New
-import Lamdera
+import Evergreen.V2.Types as Old
+import Evergreen.V3.Types as New
 import Lamdera.Migrations exposing (..)
 
 
 frontendModel : Old.FrontendModel -> ModelMigration New.FrontendModel New.FrontendMsg
 frontendModel old =
-    ModelMigrated
-        ( { currentColor = old.currentColor
-          , changeCount = Nothing
-          }
-        , New.ClientConnect |> Lamdera.sendToBackend
-        )
+    ModelUnchanged
 
 
 backendModel : Old.BackendModel -> ModelMigration New.BackendModel New.BackendMsg
 backendModel old =
-    ModelMigrated
-        ( { clients = old.clients
-          , currentColor = old.currentColor
-          , changeCount = 0
-          , lastChangedBy = Nothing
-          }
-        , Cmd.none
-        )
+    ModelUnchanged
 
 
 frontendMsg : Old.FrontendMsg -> MsgMigration New.FrontendMsg New.FrontendMsg
@@ -44,5 +31,5 @@ backendMsg old =
 
 
 toFrontend : Old.ToFrontend -> MsgMigration New.ToFrontend New.FrontendMsg
-toFrontend (Old.UpdateColor color) =
-    MsgMigrated ( New.UpdateColor color 0, Cmd.none )
+toFrontend old =
+    MsgUnchanged
