@@ -21,7 +21,13 @@ app =
 
 init : ( Model, Cmd BackendMsg )
 init =
-    ( { currentColor = ColorIndex.Blue, changeCount = 0, lastChangedBy = Nothing, clients = Set.empty }, Cmd.none )
+    ( { currentColor = ColorIndex.Blue
+      , changeCount = 2688 -- This was the last change count before the app was reset.
+      , lastChangedBy = Nothing
+      , clients = Set.empty
+      }
+    , Cmd.none
+    )
 
 
 update : BackendMsg -> Model -> ( Model, Cmd BackendMsg )

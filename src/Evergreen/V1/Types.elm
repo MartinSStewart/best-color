@@ -1,28 +1,31 @@
 module Evergreen.V1.Types exposing (..)
 
-import ColorIndex exposing (ColorIndex)
-import Lamdera exposing (ClientId)
-import Set exposing (Set)
-
-
-type alias BackendModel =
-    { clients : Set ClientId
-    , currentColor : ColorIndex
-    }
+import Evergreen.V1.ColorIndex as ColorIndex
+import Lamdera
+import Set
 
 
 type alias FrontendModel =
-    { currentColor : Maybe ColorIndex
+    { currentColor : (Maybe ColorIndex.ColorIndex)
+    , changeCount : (Maybe Int)
+    }
+
+
+type alias BackendModel =
+    { clients : (Set.Set Lamdera.ClientId)
+    , currentColor : ColorIndex.ColorIndex
+    , changeCount : Int
+    , lastChangedBy : (Maybe Lamdera.SessionId)
     }
 
 
 type FrontendMsg
-    = UserPressColor ColorIndex
+    = UserPressColor ColorIndex.ColorIndex
     | FNoop
 
 
 type ToBackend
-    = ChooseColor ColorIndex
+    = ChooseColor ColorIndex.ColorIndex
     | ClientConnect
 
 
@@ -31,4 +34,4 @@ type BackendMsg
 
 
 type ToFrontend
-    = UpdateColor ColorIndex
+    = UpdateColor ColorIndex.ColorIndex Int

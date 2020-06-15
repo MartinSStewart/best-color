@@ -1,4 +1,4 @@
-module Evergreen.V3.ColorIndex exposing (..)
+module Evergreen.V1.ColorIndex exposing (..)
 
 type ColorIndex
     = Red
