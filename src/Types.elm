@@ -31,6 +31,7 @@ type ToBackend
 
 type BackendMsg
     = Noop
+    | ClientDisconnect SessionId ClientId
 
 
 type ToFrontend

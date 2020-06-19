@@ -15,14 +15,14 @@ app =
         { init = init
         , update = update
         , updateFromFrontend = updateFromFrontend
-        , subscriptions = \m -> Sub.none
+        , subscriptions = subscriptions
         }
 
 
 init : ( Model, Cmd BackendMsg )
 init =
     ( { currentColor = ColorIndex.Blue
-      , changeCount = 2688 -- This was the last change count before the app was reset.
+      , changeCount = 3119 -- This was the last change count before the app was reset.
       , lastChangedBy = Nothing
       , clients = Set.empty
       }
@@ -35,6 +35,11 @@ update msg model =
     case msg of
         Noop ->
             ( model, Cmd.none )
+
+        ClientDisconnect _ clientId_ ->
+            ( { model | clients = Set.remove clientId_ model.clients }
+            , Cmd.none
+            )
 
 
 updateFromFrontend : SessionId -> ClientId -> ToBackend -> Model -> ( Model, Cmd BackendMsg )
@@ -65,3 +70,8 @@ broadcast clients msg =
         |> Set.toList
         |> List.map (\clientId -> Lamdera.sendToFrontend clientId msg)
         |> Cmd.batch
+
+
+subscriptions : Model -> Sub BackendMsg
+subscriptions _ =
+    Lamdera.onDisconnect ClientDisconnect
