@@ -1,6 +1,7 @@
-module ColorIndex exposing (ColorIndex(..), allColors, colorToElColor, toColor, toElColor, toString)
+module ColorIndex exposing (ColorIndex(..), allColors, colorToElColor, toColor, toElColor, toHighlightColor, toString)
 
 import Color exposing (Color)
+import Color.Manipulate
 import Element
 
 
@@ -41,6 +42,34 @@ toColor colorIndex =
 
         Yellow ->
             Color.yellow
+
+
+toHighlightColor : ColorIndex -> Color
+toHighlightColor colorIndex =
+    case colorIndex of
+        Red ->
+            Color.red |> Color.Manipulate.lighten 0.1
+
+        Green ->
+            Color.green |> Color.Manipulate.lighten 0.1
+
+        Blue ->
+            Color.blue |> Color.Manipulate.lighten 0.1
+
+        Orange ->
+            Color.orange |> Color.Manipulate.lighten 0.1
+
+        Brown ->
+            Color.rgb255 110 71 0 |> Color.Manipulate.lighten 0.1
+
+        Purple ->
+            Color.purple |> Color.Manipulate.lighten 0.1
+
+        Pink ->
+            Color.rgb 1 0.8 0.8
+
+        Yellow ->
+            Color.yellow |> Color.Manipulate.lighten 0.1
 
 
 toElColor : ColorIndex -> Element.Color

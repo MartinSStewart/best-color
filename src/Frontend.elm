@@ -92,7 +92,7 @@ view_ changeCount color =
                 [ Font.size 40, Element.centerX, Element.centerY ]
                 [ Element.text <| "The best color is"
                 , Element.el
-                    [ ColorIndex.toColor color |> Color.Manipulate.lighten 0.1 |> ColorIndex.colorToElColor |> Font.color
+                    [ ColorIndex.toHighlightColor color |> ColorIndex.colorToElColor |> Font.color
                     , Font.shadow { offset = ( 0, 2 ), blur = 3, color = Element.rgba 0 0 0 0.5 }
                     , Font.size 80
                     , Element.centerX
