@@ -1,8 +1,10 @@
-module ColorIndex exposing (ColorIndex(..), allColors, colorToElColor, toColor, toElColor, toHighlightColor, toString)
+module ColorIndex exposing (ColorIndex(..), allColors, colorToElColor, toColor, toColorFavicon, toElColor, toHighlightColor, toString)
 
 import Color exposing (Color)
 import Color.Manipulate
 import Element
+import Image
+import Image.Color
 
 
 type ColorIndex
@@ -80,6 +82,35 @@ toElColor =
 allColors : List ColorIndex
 allColors =
     [ Red, Orange, Yellow, Green, Blue, Purple, Pink, Brown ]
+
+
+colorFavicons : List ( ColorIndex, String )
+colorFavicons =
+    List.map
+        (\index ->
+            toColor index
+                |> List.singleton
+                |> List.singleton
+                |> Image.Color.fromList2d
+                |> Image.toPngUrl
+                |> Tuple.pair index
+        )
+        allColors
+
+
+toColorFavicon : ColorIndex -> String
+toColorFavicon colorIndex =
+    List.filterMap
+        (\( index, value ) ->
+            if index == colorIndex then
+                Just value
+
+            else
+                Nothing
+        )
+        colorFavicons
+        |> List.head
+        |> Maybe.withDefault ""
 
 
 toString : ColorIndex -> String

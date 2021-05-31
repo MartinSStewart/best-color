@@ -1,4 +1,4 @@
-module Frontend exposing (Model, app)
+port module Frontend exposing (Model, app)
 
 import Color.Manipulate
 import ColorIndex
@@ -9,6 +9,9 @@ import Element.Input as Input
 import Html exposing (Html)
 import Lamdera
 import Types exposing (..)
+
+
+port martinsstewart_set_favicon_to_js : String -> Cmd msg
 
 
 type alias Model =
@@ -35,7 +38,9 @@ app =
 
 init : ( Model, Cmd FrontendMsg )
 init =
-    ( { currentColor = Nothing, changeCount = Nothing }, Lamdera.sendToBackend ClientConnect )
+    ( { currentColor = Nothing, changeCount = Nothing }
+    , Lamdera.sendToBackend ClientConnect
+    )
 
 
 update : FrontendMsg -> Model -> ( Model, Cmd FrontendMsg )
@@ -45,14 +50,24 @@ update msg model =
             ( model, Cmd.none )
 
         UserPressColor colorIndex ->
-            ( { model | currentColor = Just colorIndex }, Lamdera.sendToBackend (ChooseColor colorIndex) )
+            ( { model | currentColor = Just colorIndex }
+            , Cmd.batch
+                [ Lamdera.sendToBackend (ChooseColor colorIndex)
+                , martinsstewart_set_favicon_to_js (ColorIndex.toColorFavicon colorIndex)
+                ]
+            )
 
 
 updateFromBackend : ToFrontend -> Model -> ( Model, Cmd FrontendMsg )
 updateFromBackend msg model =
     case msg of
         UpdateColor colorIndex changeCount ->
-            ( { model | currentColor = Just colorIndex, changeCount = Just changeCount }, Cmd.none )
+            ( { model
+                | currentColor = Just colorIndex
+                , changeCount = Just changeCount
+              }
+            , martinsstewart_set_favicon_to_js (ColorIndex.toColorFavicon colorIndex)
+            )
 
 
 view : Model -> { title : String, body : List (Html FrontendMsg) }
