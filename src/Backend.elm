@@ -22,7 +22,7 @@ app =
 init : ( Model, Cmd BackendMsg )
 init =
     ( { currentColor = ColorIndex.Blue
-      , changeCount = 3119 -- This was the last change count before the app was reset.
+      , changeCount = 8330 -- This was the last change count before the app was reset.
       , lastChangedBy = Nothing
       , clients = Set.empty
       }
