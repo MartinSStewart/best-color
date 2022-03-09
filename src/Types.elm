@@ -6,8 +6,7 @@ import Set exposing (Set)
 
 
 type alias BackendModel =
-    { clients : Set ClientId
-    , currentColor : ColorIndex
+    { currentColor : ColorIndex
     , changeCount : Int
     , lastChangedBy : Maybe SessionId
     }
@@ -25,13 +24,12 @@ type FrontendMsg
 
 
 type ToBackend
-    = ChooseColor ColorIndex
-    | ClientConnect
+    = ColorChosen ColorIndex
+    | ClientConnected
 
 
 type BackendMsg
     = Noop
-    | ClientDisconnect SessionId ClientId
 
 
 type ToFrontend
