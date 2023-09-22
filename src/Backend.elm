@@ -22,7 +22,7 @@ updateFromFrontend sessionId clientId msg model =
             , Lamdera.sendToFrontend clientId (UpdateColor model.currentColor model.changeCount)
             )
 
-        ColorChosen chosenColor ->
+        ColorChosen color ->
             let
                 changeCount =
                     if model.lastChangedBy == Just sessionId then
@@ -31,6 +31,6 @@ updateFromFrontend sessionId clientId msg model =
                     else
                         model.changeCount + 1
             in
-            ( { currentColor = chosenColor, lastChangedBy = Just sessionId, changeCount = changeCount }
-            , Lamdera.broadcast (UpdateColor chosenColor changeCount)
+            ( { currentColor = color, lastChangedBy = Just sessionId, changeCount = changeCount }
+            , Lamdera.broadcast (UpdateColor color changeCount)
             )
