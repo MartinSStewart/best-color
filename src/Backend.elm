@@ -25,7 +25,7 @@ updateFromFrontend sessionId clientId msg model =
         ColorChosen color ->
             let
                 changeCount =
-                    if model.lastChangedBy == Just sessionId then
+                    if model.lastChangedBy == Just sessionId || color == model.currentColor then
                         model.changeCount
 
                     else
