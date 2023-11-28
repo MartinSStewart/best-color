@@ -23,18 +23,14 @@ updateFromFrontend sessionId clientId msg model =
             )
 
         ColorChosen color ->
-            ( model, Cmd.none )
+            let
+                changeCount =
+                    if model.lastChangedBy == Just sessionId || color == model.currentColor then
+                        model.changeCount
 
-
-
---let
---    changeCount =
---        if model.lastChangedBy == Just sessionId || color == model.currentColor then
---            model.changeCount
---
---        else
---            model.changeCount + 1
---in
---( { currentColor = color, lastChangedBy = Just sessionId, changeCount = changeCount }
---, Lamdera.broadcast (UpdateColor color changeCount)
---)
+                    else
+                        model.changeCount + 1
+            in
+            ( { currentColor = color, lastChangedBy = Just sessionId, changeCount = changeCount }
+            , Lamdera.broadcast (UpdateColor color changeCount)
+            )

@@ -67,30 +67,24 @@ updateFromBackend msg model =
 
 view : FrontendModel -> { title : String, body : List (Html FrontendMsg) }
 view model =
-    { title = "The best color is taking a break!"
-    , body = [ Html.text "The best color is taking a break!" ]
-    }
+    case ( model.currentColor, model.changeCount ) of
+        ( Just color, Just changeCount ) ->
+            { title = "The best color is " ++ ColorIndex.toString color ++ "!"
+            , body =
+                [ Element.layout
+                    []
+                    (view_ changeCount color)
+                ]
+            }
 
-
-
---case ( model.currentColor, model.changeCount ) of
---    ( Just color, Just changeCount ) ->
---        { title = "The best color is " ++ ColorIndex.toString color ++ "!"
---        , body =
---            [ Element.layout
---                []
---                (view_ changeCount color)
---            ]
---        }
---
---    _ ->
---        { title = ""
---        , body =
---            [ Element.layout
---                []
---                Element.none
---            ]
---        }
+        _ ->
+            { title = ""
+            , body =
+                [ Element.layout
+                    []
+                    Element.none
+                ]
+            }
 
 
 view_ : Int -> ColorIndex.ColorIndex -> Element.Element FrontendMsg
